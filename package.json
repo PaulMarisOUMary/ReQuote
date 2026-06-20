@@ -1,0 +1,96 @@
+{
+  "name": "ReQuote",
+  "displayName": "ReQuote",
+  "description": "Automatically converts quote style based on content length, single char strings use single quotes ('a'), multi-char strings use double quotes (\"hello\").",
+  "version": "0.0.1",
+  "publisher": "PaulMarisOUMary",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PaulMarisOUMary/ReQuote"
+  },
+  "categories": [
+    "Formatters"
+  ],
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.125.0"
+  },
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "ReQuote",
+      "properties": {
+        "ReQuote.autoRefactor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically flip quotes on keystroke(debounced)."
+        },
+        "ReQuote.languages": {
+          "type": "array",
+          "default": [
+            "c",
+            "cpp",
+            "csharp",
+            "dart",
+            "javascript",
+            "javascriptreact",
+            "php",
+            "python",
+            "ruby",
+            "rust",
+            "svelte",
+            "typescript",
+            "typescriptreact",
+            "vue"
+          ],
+          "description": "Languages where ReQuote is active."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "ReQuote.toggle",
+        "title": "ReQuote: Toggle Auto Quote Refactor"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ReQuote.toggle",
+        "key": "alt+q",
+        "mac": "alt+q",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test:logic": "tsc -p tsconfig.test.json && mocha --ui tdd out/test/quote.test.js",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.125.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.27.3",
+    "eslint": "^9.39.3",
+    "mocha": "^11.7.6",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
+  }
+}

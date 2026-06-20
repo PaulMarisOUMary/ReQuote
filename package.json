@@ -53,6 +53,10 @@
       {
         "command": "ReQuote.toggle",
         "title": "ReQuote: Toggle Auto Quote Refactor"
+      },
+      {
+        "command": "ReQuote.formatFile",
+        "title": "ReQuote: Format File"
       }
     ],
     "keybindings": [
@@ -60,6 +64,12 @@
         "command": "ReQuote.toggle",
         "key": "alt+q",
         "mac": "alt+q",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "ReQuote.formatFile",
+        "key": "alt+shift+q",
+        "mac": "alt+shift+q",
         "when": "editorTextFocus"
       }
     ]

@@ -37,6 +37,30 @@ async function runOnEditor(editor = vscode.window.activeTextEditor): Promise<voi
     }
 }
 
+async function formatFile(
+  editor = vscode.window.activeTextEditor,
+): Promise<void> {
+  if (!editor || isEditing) { return; }
+  if (!isLangSupported(editor.document)) { return; }
+
+  const document = editor.document;
+  const fullRange = new vscode.Range(
+    document.positionAt(0),
+    document.positionAt(document.getText().length),
+  );
+
+  const original = document.getText();
+  const flipped = flipQuotes(original);
+  if (flipped === original) { return; }
+
+  isEditing = true;
+  try {
+    await editor.edit((builder) => builder.replace(fullRange, flipped));
+  } finally {
+    isEditing = false;
+  }
+}
+
 
 // Helpers
 
@@ -67,6 +91,7 @@ function isCursorInsideUnclosedString(editor: vscode.TextEditor): boolean {
 
 const COMMANDS: Record<string, () => void> = {
     toggle: () => { void runOnEditor(); },
+    formatFile: () => { void formatFile(); },
 };
 
 function registerCommands(context: vscode.ExtensionContext): void {

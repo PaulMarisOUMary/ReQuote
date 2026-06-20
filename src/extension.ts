@@ -5,6 +5,8 @@ import { flipQuotes, SUPPORTED_LANGUAGES } from './quote';
 
 const EXT = "ReQuote";
 
+const DEBOUNCE_DELAY = 600;
+
 
 // Core logic
 
@@ -14,6 +16,8 @@ async function runOnEditor(editor = vscode.window.activeTextEditor): Promise<voi
     if (!editor || isEditing) { return; }
 
     if (!SUPPORTED_LANGUAGES.has(editor.document.languageId)) { return; }
+
+    if (isCursorInsideUnclosedString(editor)) { return;}
 
     isEditing = true;
     try {
@@ -31,6 +35,31 @@ async function runOnEditor(editor = vscode.window.activeTextEditor): Promise<voi
     } finally {
         isEditing = false;
     }
+}
+
+
+// Helpers
+
+function isLangSupported(document: vscode.TextDocument): boolean {
+  const config = vscode.workspace.getConfiguration(EXT);
+  const langs = new Set(config.get<string[]>("languages") ?? []);
+  return langs.has(document.languageId);
+}
+
+function isCursorInsideUnclosedString(editor: vscode.TextEditor): boolean {
+  for (const sel of editor.selections) {
+    const line = editor.document.lineAt(sel.active.line).text;
+    const col = sel.active.character;
+    const before = line.slice(0, col);
+
+    const countUnescaped = (str: string, q: string) =>
+      (str.match(new RegExp(`(?<!\\\\)${q}`, 'g')) ?? []).length;
+
+    for (const q of ['"', "'", '`']) {
+      if (countUnescaped(before, q) % 2 !== 0) { return true; }
+    }
+  }
+  return false;
 }
 
 
@@ -61,19 +90,20 @@ function registerAutoRefactor(context: vscode.ExtensionContext): void {
             const config = vscode.workspace.getConfiguration(EXT);
             if (!config.get<boolean>("autoRefactor")) { return; }
 
-            const langs = new Set(config.get<string[]>("languages") ?? []);
-            if (!langs.has(document.languageId)) { return; }
-
             const editor = vscode.window.activeTextEditor;
             if (!editor || editor.document !== document) { return; }
+            if (!isLangSupported(document)) { return; }
 
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 void runOnEditor(editor);
-            }, 300);
+            }, DEBOUNCE_DELAY);
         }),
     );
 }
+
+
+// Lifecycle
 
 export function activate(context: vscode.ExtensionContext): void {
     registerCommands(context);
